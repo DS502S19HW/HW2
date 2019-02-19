@@ -5,8 +5,9 @@
 # The College.csv file should be in working direction 
 setwd('Z:/R_working_directory/DS502HW2');
 
-# Read the file
+# Read the file and set the random seed
 ds = read.csv(file = 'default.csv', header = TRUE);
+set.seed(1)
 
 # (a) Fit a logistic regression model that uses income and balance
 #     to predict default
@@ -15,7 +16,6 @@ summary(fit)
 
 # (b) Using the validation set approach, estimate the test error of this model
 # i. Split the sample set
-
 train = sample(nrow(ds), nrow(ds)/2)
 
 # ii. Fit with training set
@@ -69,3 +69,4 @@ error2 = function(){
 error2()
 error2()
 error2()
+
