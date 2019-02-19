@@ -1,0 +1,78 @@
+---
+title: "Li_Tianyu_Sun_Jingyan_HW2"
+author: "Tianyu Li and Jingyan Sun"
+date: "February 19, 2019"
+output:
+  pdf_document: default
+  word_document: default
+---
+
+```{r setup, include=FALSE}
+knitr::opts_chunk$set(echo = TRUE)
+```
+#R Markdown
+#Question 1(Cha4-Q1)
+Proof:
+
+#Question 2(Cha4-Q5)
+##(a) 
+If the Bayes decision boundary is linear, we expect QDA to perform better on training set because of its higher flexibility; while LDA perform better on test set than QLA does, because QDA could overfit the linearity on the Bayes decision boundary.
+##(b) 
+If the Bayes decision boundary is non-linear, we expect QDA better on both.
+##(c) 
+General speaking, LDA tends to be a better bet than QDA if there are relatively few training observations. In contrast, when sample size n (training set) increases, QDA is recommended, so that the variance of the classifier is not a major concern, or if the assumption of a common covariance matrix for the K classes is clearly.
+##(d) 
+False. It depends on different situation, sometimes it is an advantage to apply a method with more flexibility such as QDA which may lead a superior test error rate, but it can turn to a disadvantage when too much flexible may lead to overfit, turning to an inferior test error rate.  
+
+#Question 3(Cha4-Q8)
+In this case, we should choose logistic regression because of its lower test error rate. With KNN with K=1, the training error rate is always 0%. Given the average error rate (averaged over both test and training data sets) of it is 18%, we can see that the tests error rate is 36%. On the opposite, by using logistic regression, the test error rate is 30%, which is smaller than the test error rate of KNN when K=1. So, it is more appropriate to choose logistic regression based on the test error rate.  
+
+#Question 4(Cha4-Q10)
+```{r}
+
+
+
+
+```
+
+#Question 5(Cha4-Q11)
+```{r}
+
+
+
+
+```
+
+#Question 6(Cha5-Q1)
+Proof:
+
+#Question 7(Cha5-Q2)
+##(a) 1-1/n. 
+Because bootstrap sampling draws items with replacement, we are sampling from the same pool with the same probability for each time, so there are (n-1) items in the n that are not j and with a probability of 1-1/n that the first item is not j.
+##(b) 1-1/n
+Still because the bootstrap sampling pattern is with replacement, so the probability would not change in this case.
+##(c) 
+In previous situation, we can get the probability that the jth observation is not in the bootstrap sample is (1-1/n) for each time sampling. With the bootstrap where n!=j, the same situation applies and probability for j have to repeated for n times, then the result would be [(1-1/n)]^n.
+##(d)
+When N=5,P(j^th  observation in bootstrap sample)=[1-(1-1/5)]^5=0.6723
+##(e)
+When N=100, P(j^th  observation in bootstrap sample)=[1-(1-1/100)]^100=0.6340
+##(f)
+When N=10000, P(j^th  observation in bootstrap sample)=[1-(1-1/10000)]^10000=0.6321
+
+#Question 8(Cha5-Q5)
+```{r}
+
+
+
+
+```
+
+#Question 9(Cha5-Q6)
+```{r}
+
+
+
+
+```
+Note that the `echo = FALSE` parameter was added to the code chunk to prevent printing of the R code that generated the plot.
