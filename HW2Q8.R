@@ -1,13 +1,14 @@
 # Author: Tianyu Li
-# Created on Feb 18th  2019
+# Created on Feb 18th, 2019
 #
 # R script for Homework 2 Question 8(Section 5.4, page 198, question 5)
 # The College.csv file should be in working direction 
+rm(list = ls())
 setwd('Z:/R_working_directory/DS502HW2');
 
 # Read the file and set the random seed
 ds = read.csv(file = 'default.csv', header = TRUE);
-set.seed(1)
+set.seed(3)
 
 # (a) Fit a logistic regression model that uses income and balance
 #     to predict default
