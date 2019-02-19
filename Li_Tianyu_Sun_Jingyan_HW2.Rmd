@@ -3,10 +3,10 @@ title: "Li_Tianyu_Sun_Jingyan_HW2"
 author: "Tianyu Li and Jingyan Sun"
 date: "February 19, 2019"
 output:
-  pdf_document: default
+  word_document: default
   html_document:
     df_print: paged
-  word_document: default
+  pdf_document: default
 ---
 
 ```{r setup, include=FALSE}
@@ -31,17 +31,299 @@ In this case, we should choose logistic regression because of its lower test err
 
 #Question 4(Cha4-Q10)
 ```{r}
+# Author: Tianyu Li
+# Created on Feb 18th, 2019
+#
+# R script for Homework 2 Question 4(Section 4.7, page 171, question 10)
+# The College.csv file should be in working direction 
+rm(list = ls())
+setwd('Z:/R_working_directory/DS502HW2');
+library(MASS)
+library(class)
 
+# Read the file and set the random seed
+ds = read.csv(file = 'weekly.csv', header = TRUE);
+set.seed(1)
 
+# (a) Produce some numerical and graphical summaries of the Weekly data
+summary(ds)
+pairs(ds)
+# From the figures we can tell that there appears to be 
+# relationship between Year and Volume: Volume is increasing
+# as year increasing
 
+# (b) Perform a logistic regression with Direction over Lags and Volume
+fit = glm(Direction ~ Lag1 + Lag2 + Lag3 + Lag4 + Lag5 + Volume,
+          family = "binomial", data = ds)
+summary(fit)
+# It looks like only Lag2 appear to be statistically significant as
+# its p-value smaller than 0.05
+
+# (c) Compute the confusion matrix and fraction of correct predictions
+pred = predict(fit, type = "response")
+result = rep("Down", length(pred))
+result[pred > 0.5] = "Up"
+
+# Confusion matrix
+table(result, ds$Direction)
+
+# Fraction of correct predictions
+mean(result == ds$Direction)
+# The confusion matrix shows that the model tends to predict most directions
+# as "UP", which leads to a only 56.1% accuracy on prediction.
+
+# (d) Perform a logistic regression with Lag2 as the predictor
+
+# Helper function to calculate the fraction of correct predictions from 
+# the confusion matrix
+accuracy = function(table) {
+  result = (table[1, 1] + table[2, 2]) / sum(table)
+  return (result)
+}
+
+fit = glm(Direction ~ Lag2, family = "binomial",
+          data = ds, subset = Year < 2009)
+fit
+
+# Confusion matrix and fraction of correct predictions
+pred = predict.glm(fit, subset(ds, Year >= 2009), type = "response")
+result = rep("Down", length(pred))
+result[pred > 0.5] = "Up"
+d_table = table(result, subset(ds, Year >= 2009)$Direction)
+d_table
+accuracy(d_table)
+
+# (e) Perform a LDA with Lag2 as the predictor
+fit = lda(Direction ~ Lag2, data = ds, subset = Year < 2009)
+fit
+
+# Confusion matrix and fraction of correct predictions
+pred = predict(fit, subset(ds, Year >= 2009), type = "response")
+e_table = table(pred$class, subset(ds, Year >= 2009)$Direction)
+e_table
+accuracy(e_table)
+
+# (f) Perform a QDA Lag2 as the predictor
+fit = qda(Direction ~ Lag2, data = ds, subset = Year < 2009)
+fit
+
+# Confusion matrix and fraction of correct predictions
+pred = predict(fit, subset(ds, Year >= 2009), type = "response")
+f_table = table(pred$class, subset(ds, Year >= 2009)$Direction)
+f_table
+accuracy(f_table)
+
+# (g) Perform a KNN with Lag2 as the predictor
+pred = knn(data.frame(subset(ds, Year < 2009)$Lag2),
+          data.frame(subset(ds, Year >= 2009)$Lag2),
+          subset(ds, Year < 2009)$Direction, k = 1)
+
+# Confusion matrix and fraction of correct predictions
+g_table = table(pred, subset(ds, Year >= 2009)$Direction)
+g_table
+accuracy(g_table)
+
+# (h) Compare results
+accuracy(d_table)
+accuracy(e_table)
+accuracy(f_table)
+accuracy(g_table)
+# In our test, Logistic regression and LDA give the highest 
+# fraction of correct predictions, then QDA, 
+# and KNN with k=1 has the lowest accuracy rate
+
+# (i) Experiments
+# logistic Regression
+fit = glm(Direction ~ Lag1 + Lag2 + Lag3 + Lag4 + Lag5 + Volume,
+          family = "binomial", data = ds, subset = Year < 2009)
+pred = predict.glm(fit, subset(ds, Year >= 2009), type = "response")
+result = rep("Down", length(pred))
+result[pred > 0.5] = "Up"
+glm1 = table(result, subset(ds, Year >= 2009)$Direction)
+
+fit = glm(Direction ~ Lag1 * Lag2 * Lag3 * Lag4 * Lag5 + Volume,
+          family = "binomial", data = ds, subset = Year < 2009)
+pred = predict.glm(fit, subset(ds, Year >= 2009), type = "response")
+result = rep("Down", length(pred))
+result[pred > 0.5] = "Up"
+glm2 = table(result, subset(ds, Year >= 2009)$Direction)
+
+# LDA
+fit = lda(Direction ~ Lag1 + Lag2 + Lag3 + Lag4 + Lag5 + Volume,
+          data = ds, subset = Year < 2009)
+pred = predict(fit, subset(ds, Year >= 2009), type = "response")
+lda1 = table(pred$class, subset(ds, Year >= 2009)$Direction)
+
+fit = lda(Direction ~ Lag1 * Lag2 * Lag3 * Lag4 * Lag5 + Volume,
+          data = ds, subset = Year < 2009)
+pred = predict(fit, subset(ds, Year >= 2009), type = "response")
+lda2 = table(pred$class, subset(ds, Year >= 2009)$Direction)
+
+# QDA
+fit = qda(Direction ~ Lag1 + Lag2 + Lag3 + Lag4 + Lag5 + Volume,
+          data = ds, subset = Year < 2009)
+pred = predict(fit, subset(ds, Year >= 2009), type = "response")
+qda1 = table(pred$class, subset(ds, Year >= 2009)$Direction)
+
+fit = qda(Direction ~ Lag1 * Lag2 * Lag3 * Lag4 * Lag5 + Volume,
+          data = ds, subset = Year < 2009)
+pred = predict(fit, subset(ds, Year >= 2009), type = "response")
+qda2 = table(pred$class, subset(ds, Year >= 2009)$Direction)
+
+#KNN
+pred = knn(data.frame(subset(ds, Year < 2009)$Lag2),
+           data.frame(subset(ds, Year >= 2009)$Lag2),
+           subset(ds, Year < 2009)$Direction, k = 10)
+knn1 = table(pred, subset(ds, Year >= 2009)$Direction)
+
+pred = knn(data.frame(subset(ds, Year < 2009)$Lag2),
+           data.frame(subset(ds, Year >= 2009)$Lag2),
+           subset(ds, Year < 2009)$Direction, k = 50)
+knn2 = table(pred, subset(ds, Year >= 2009)$Direction)
+
+accuracy(glm1)
+accuracy(glm2)
+accuracy(lda1)
+accuracy(lda2)
+accuracy(qda1)
+accuracy(qda2)
+accuracy(knn1)
+accuracy(knn2)
+accuracy(d_table)
+accuracy(e_table)
+accuracy(f_table)
+accuracy(g_table)
+# THe K value in KNN does not seem to influcence the test error rate significantly
+# And over all experiments, the original logsitic regression with Volume over lag2,
+# and LDA with Volume over lag2 still have the lowest error rate.
 
 ```
 
 #Question 5(Cha4-Q11)
 ```{r}
+# Author: Tianyu Li
+# Created on Feb 18th, 2019
+#
+# R script for Homework 2 Question 5(Section 4.7, page 171, question 11)
+# The College.csv file should be in working direction 
+rm(list = ls())
+setwd('Z:/R_working_directory/DS502HW2');
+library(MASS)
+library(class)
 
+# Read the file and set the random seed
+ds = read.csv(file = 'Auto.csv', header = TRUE);
+set.seed(2)
 
+# Remove missing values
+ds[ds == '?'] <- NA;
+ds = na.omit(ds);
+ds$horsepower = as.numeric(as.character(ds$horsepower));
 
+# (a) Create variable mpg01
+mpg01 = rep(0, nrow(ds))
+mpg01[ds$mpg > median(ds$mpg)] = 1
+ds = data.frame(ds, mpg01)
+
+# (b) Explore data and investigate the association 
+#     between "mpg01" and the other features
+par(mfrow=c(1,1))
+pairs(ds)
+
+par(mfrow=c(3,2))
+boxplot(cylinders ~ mpg01, data = ds, main = "Cylinders vs mpg01")
+boxplot(displacement ~ mpg01, data = ds, main = "Displacement vs mpg01")
+boxplot(horsepower ~ mpg01, data = ds, main = "Horsepower vs mpg01")
+boxplot(weight ~ mpg01, data = ds, main = "Weight vs mpg01")
+boxplot(acceleration ~ mpg01, data = ds, main = "Acceleration vs mpg01")
+boxplot(year ~ mpg01, data = ds, main = "Year vs mpg01")
+# It looks like that cylinders, displacement, horse power and weight have
+# Strong association with mpg01, and acceleration has weak association.
+
+# (c) Split the data
+index = sample(nrow(ds), nrow(ds)/2)
+train = ds[index, ]
+test = ds[-index, ]
+
+# (d) Pefrome LDA
+fit = lda(mpg01 ~ cylinders + displacement + horsepower + weight + acceleration,
+          data = train)
+fit
+
+# Test error
+pred = predict(fit, test, type = "response")
+table(pred$class, test$mpg01)
+mean(pred$class != test$mpg01)
+
+# (e) Pefrome QDA
+fit = qda(mpg01 ~ cylinders + displacement + horsepower + weight + acceleration,
+          data = train)
+fit
+
+# Test error
+pred = predict(fit, test, type = "response")
+table(pred$class, test$mpg01)
+mean(pred$class != test$mpg01)
+
+# (f) Perform logistic regression
+fit = glm(mpg01 ~ cylinders + displacement + horsepower + weight + acceleration,
+          family = "binomial", data = train)
+fit
+
+# Test error
+pred = predict.glm(fit, test, type = "response")
+result = rep(0, length(pred))
+result[pred > 0.5] = 1
+table(result, test$mpg01)
+mean(result != test$mpg01)
+
+# (g) Perform KNN
+# K = 1
+pred = knn(data.frame(train$cylinders, train$displacement, train$horsepower, train$weight, train$acceleration),
+           data.frame(test$cylinders, test$displacement, test$horsepower, test$weight, test$acceleration),
+           train$mpg01, k = 1)
+table(pred, test$mpg01)
+mean(pred != test$mpg01)
+
+# K = 5
+pred = knn(data.frame(train$cylinders, train$displacement, train$horsepower, train$weight, train$acceleration),
+           data.frame(test$cylinders, test$displacement, test$horsepower, test$weight, test$acceleration),
+           train$mpg01, k = 5)
+table(pred, test$mpg01)
+mean(pred != test$mpg01)
+
+# K = 20
+pred = knn(data.frame(train$cylinders, train$displacement, train$horsepower, train$weight, train$acceleration),
+           data.frame(test$cylinders, test$displacement, test$horsepower, test$weight, test$acceleration),
+           train$mpg01, k = 20)
+table(pred, test$mpg01)
+mean(pred != test$mpg01)
+
+# K = 100
+pred = knn(data.frame(train$cylinders, train$displacement, train$horsepower, train$weight, train$acceleration),
+           data.frame(test$cylinders, test$displacement, test$horsepower, test$weight, test$acceleration),
+           train$mpg01, k = 100)
+table(pred, test$mpg01)
+mean(pred != test$mpg01)
+
+# Error rate over K
+acc_knn = function(k) {
+  pred = knn(data.frame(train$cylinders, train$displacement, train$horsepower, train$weight, train$acceleration),
+             data.frame(test$cylinders, test$displacement, test$horsepower, test$weight, test$acceleration),
+             train$mpg01, k = k)
+  return (mean(pred != test$mpg01))
+}
+
+x = vector()
+y = vector()
+for(i in 1:100) {
+  x[i] = i
+  y[i] = acc_knn(i)
+}
+
+par(mfrow=c(1,1))
+plot(x, y, type = "b", xlab = "k", ylab = "error rate", main = "Error rate over K")
+# It looks like K does not influence the performance on this data set.
 
 ```
 
@@ -61,19 +343,160 @@ When N=5,P(j^th  observation in bootstrap sample)=[1-(1-1/5)]^5=0.6723
 When N=100, P(j^th  observation in bootstrap sample)=[1-(1-1/100)]^100=0.6340
 ##(f)
 When N=10000, P(j^th  observation in bootstrap sample)=[1-(1-1/10000)]^10000=0.6321
+```{r}
+# Author: Tianyu Li
+# Created on Feb 18th, 2019
+#
+# R script for Homework 2 Question 7(Section 5.4, page 198, question 8)
+rm(list = ls())
+
+#(g) Create a plot on probablities of n = 1 to 10000
+x = vector()
+y = vector()
+
+for(n in 1:10000) {
+  x[n] = n
+  y[n] = 1 - ((1 - 1/n) ^ n)
+}
+
+par(mfrow=c(1,2))
+plot(x, y, xlab = "n", ylab = "probablity",
+     main = "probablities of n = 1 to 10000")
+plot(x[1000:10000], y[1000:10000], xlab = "n", ylab = "probablity",
+     main = "probablities of n = 1000 to 10000")
+# The probablity that that the jth observation is in the bootstrap sample
+# is decreasing as the size of observation n increasing. And it looks like
+# The probablity converges to around 0.63
+
+# (h) Probablity on j = 4 by bootstrap samples
+results = vector()
+for(i in 1:10) {
+store = rep(NA, 10000)
+  for(n in 1:10000) {
+    store[n] = sum(sample(1:100, rep = TRUE) == 4) > 0
+  }
+  results[i] = mean(store)
+}
+results
+# The probablity is about 0.63, which shows that the result
+# we got on theory is correct
+
+```
 
 #Question 8(Cha5-Q5)
 ```{r}
+# Author: Tianyu Li
+# Created on Feb 18th, 2019
+#
+# R script for Homework 2 Question 8(Section 5.4, page 198, question 5)
+# The College.csv file should be in working direction 
+rm(list = ls())
+setwd('Z:/R_working_directory/DS502HW2');
 
+# Read the file and set the random seed
+ds = read.csv(file = 'default.csv', header = TRUE);
+set.seed(3)
 
+# (a) Fit a logistic regression model that uses income and balance
+#     to predict default
+fit = glm(default ~ income + balance, family = binomial, data = ds)
+summary(fit)
 
+# (b) Using the validation set approach, estimate the test error of this model
+# i. Split the sample set
+train = sample(nrow(ds), nrow(ds)/2)
+
+# ii. Fit with training set
+train_fit = glm(default ~ income + balance, family = binomial,
+                data = ds, subset = train)
+summary(train_fit)
+
+# iii. Validate the fit with testing set and classify with 
+# if the posterior probability is greater than 0.5.
+pred = predict.glm(train_fit, newdata = ds[-train, ], type = 'response')
+result = rep("No", length(pred))
+result[pred > 0.5] = "Yes"
+
+# iv Compte the validation set error
+mean(result != ds[-train, ]$default)
+
+# (c) Repeat the process in (b) three times
+# Define the process as a function
+error = function(){
+  train = sample(nrow(ds), nrow(ds)/2)
+  train_fit = glm(default ~ income + balance, family = binomial,
+                  data = ds, subset = train)
+  summary(train_fit)
+  pred = predict.glm(train_fit, newdata = ds[-train, ], type = 'response')
+  result = rep("No", length(pred))
+  result[pred > 0.5] = "Yes"
+  
+  error = mean(result != ds[-train, ]$default)
+  return(error)
+}
+
+# Repeat the function three times
+error()
+error()
+error()
+
+# The test error rate could be floating as the sample process is random
+
+# (d) Add a dummy variable for student and test
+error2 = function(){
+  train = sample(nrow(ds), nrow(ds)/2)
+  train_fit = glm(default ~ income + balance + student, family = binomial,
+                  data = ds, subset = train)
+  summary(train_fit)
+  pred = predict.glm(train_fit, newdata = ds[-train, ], type = 'response')
+  result = rep("No", length(pred))
+  result[pred > 0.5] = "Yes"
+  
+  error = mean(result != ds[-train, ]$default)
+  return(error)
+}
+
+error2()
+error2()
+error2()
+# It does not seems like adding a dummy variable for "student" would
+# reduce the test error rate.
 
 ```
 
 #Question 9(Cha5-Q6)
 ```{r}
+# Author: Tianyu Li
+# Created on Feb 18th, 2019
+#
+# R script for Homework 2 Question 9(Section 5.4, page 199, question 6)
+# The College.csv file should be in working direction 
+rm(list = ls())
+setwd('Z:/R_working_directory/DS502HW2');
+library(boot)
 
+# Read the file and set the random seed
+ds = read.csv(file = 'default.csv', header = TRUE);
+set.seed(4)
 
+# (a) Determine the estimated standard errors
+fit = glm(default ~ income + balance, family = "binomial",
+          data = ds)
+summary(fit)
+
+# (b) Write boot function
+boot_fn = function(data, index) {
+  fit = glm(default ~ income + balance, family = "binomial",
+            data = data, subset = index)
+  return (coef(fit))
+}
+
+# (c) test with bot function
+boot(ds, boot_fn, 1000)
+
+# (d) Comments
+# It looks like the estimated standard errors obtained by
+# these two methods are pretty close
 
 
 ```

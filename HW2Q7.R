@@ -23,14 +23,15 @@ plot(x[1000:10000], y[1000:10000], xlab = "n", ylab = "probablity",
 # The probablity converges to around 0.63
 
 # (h) Probablity on j = 4 by bootstrap samples
+results = vector()
 for(i in 1:10) {
 store = rep(NA, 10000)
   for(n in 1:10000) {
     store[n] = sum(sample(1:100, rep = TRUE) == 4) > 0
   }
-  mean[i] = mean(store)
+  results[i] = mean(store)
 }
-mean
+results
 # The probablity is about 0.63, which shows that the result
 # we got on theory is correct
 
