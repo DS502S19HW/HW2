@@ -34,6 +34,8 @@ boxplot(horsepower ~ mpg01, data = ds, main = "Horsepower vs mpg01")
 boxplot(weight ~ mpg01, data = ds, main = "Weight vs mpg01")
 boxplot(acceleration ~ mpg01, data = ds, main = "Acceleration vs mpg01")
 boxplot(year ~ mpg01, data = ds, main = "Year vs mpg01")
+# It looks like that cylinders, displacement, horse power and weight have
+# Strong association with mpg01, and acceleration has weak association.
 
 # (c) Split the data
 index = sample(nrow(ds), nrow(ds)/2)
@@ -45,6 +47,7 @@ fit = lda(mpg01 ~ cylinders + displacement + horsepower + weight + acceleration,
           data = train)
 fit
 
+# Test error
 pred = predict(fit, test, type = "response")
 table(pred$class, test$mpg01)
 mean(pred$class != test$mpg01)
@@ -54,6 +57,7 @@ fit = qda(mpg01 ~ cylinders + displacement + horsepower + weight + acceleration,
           data = train)
 fit
 
+# Test error
 pred = predict(fit, test, type = "response")
 table(pred$class, test$mpg01)
 mean(pred$class != test$mpg01)
@@ -63,6 +67,7 @@ fit = glm(mpg01 ~ cylinders + displacement + horsepower + weight + acceleration,
           family = "binomial", data = train)
 fit
 
+# Test error
 pred = predict.glm(fit, test, type = "response")
 result = rep(0, length(pred))
 result[pred > 0.5] = 1
@@ -70,30 +75,35 @@ table(result, test$mpg01)
 mean(result != test$mpg01)
 
 # (g) Perform KNN
+# K = 1
 pred = knn(data.frame(train$cylinders, train$displacement, train$horsepower, train$weight, train$acceleration),
            data.frame(test$cylinders, test$displacement, test$horsepower, test$weight, test$acceleration),
            train$mpg01, k = 1)
 table(pred, test$mpg01)
 mean(pred != test$mpg01)
 
+# K = 5
 pred = knn(data.frame(train$cylinders, train$displacement, train$horsepower, train$weight, train$acceleration),
            data.frame(test$cylinders, test$displacement, test$horsepower, test$weight, test$acceleration),
            train$mpg01, k = 5)
 table(pred, test$mpg01)
 mean(pred != test$mpg01)
 
+# K = 20
 pred = knn(data.frame(train$cylinders, train$displacement, train$horsepower, train$weight, train$acceleration),
            data.frame(test$cylinders, test$displacement, test$horsepower, test$weight, test$acceleration),
            train$mpg01, k = 20)
 table(pred, test$mpg01)
 mean(pred != test$mpg01)
 
+# K = 100
 pred = knn(data.frame(train$cylinders, train$displacement, train$horsepower, train$weight, train$acceleration),
            data.frame(test$cylinders, test$displacement, test$horsepower, test$weight, test$acceleration),
            train$mpg01, k = 100)
 table(pred, test$mpg01)
 mean(pred != test$mpg01)
 
+# Error rate over K
 acc_knn = function(k) {
   pred = knn(data.frame(train$cylinders, train$displacement, train$horsepower, train$weight, train$acceleration),
              data.frame(test$cylinders, test$displacement, test$horsepower, test$weight, test$acceleration),
@@ -110,4 +120,4 @@ for(i in 1:100) {
 
 par(mfrow=c(1,1))
 plot(x, y, type = "b", xlab = "k", ylab = "error rate", main = "Error rate over K")
-
+# It looks like K does not influence the performance on this data set.

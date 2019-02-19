@@ -53,6 +53,8 @@ error()
 error()
 error()
 
+# The test error rate could be floating as the sample process is random
+
 # (d) Add a dummy variable for student and test
 error2 = function(){
   train = sample(nrow(ds), nrow(ds)/2)
@@ -70,4 +72,5 @@ error2 = function(){
 error2()
 error2()
 error2()
-
+# It does not seems like adding a dummy variable for "student" would
+# reduce the test error rate.

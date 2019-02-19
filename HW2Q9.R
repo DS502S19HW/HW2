@@ -5,6 +5,7 @@
 # The College.csv file should be in working direction 
 rm(list = ls())
 setwd('Z:/R_working_directory/DS502HW2');
+library(boot)
 
 # Read the file and set the random seed
 ds = read.csv(file = 'default.csv', header = TRUE);
@@ -23,6 +24,8 @@ boot_fn = function(data, index) {
 }
 
 # (c) test with bot function
-library(boot)
 boot(ds, boot_fn, 1000)
 
+# (d) Comments
+# It looks like the estimated standard errors obtained by
+# these two methods are pretty close
